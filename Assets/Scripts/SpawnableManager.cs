@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
@@ -8,7 +9,7 @@ public class SpawnableManager : MonoBehaviour
     ARRaycastManager m_RaycastManager;
     List<ARRaycastHit> m_Hits = new List<ARRaycastHit>();
     [SerializeField]
-    GameObject spawnablePrefab;
+    GameObject[] spawnablePrefabs;
 
     Camera arCam;
     GameObject spawnedObject;
@@ -48,7 +49,8 @@ public class SpawnableManager : MonoBehaviour
             {
                 spawnedObject.transform.position = m_Hits[0].pose.position;
             }
-            if(Input.GetTouch(0).phase == TouchPhase.Ended)
+
+            if (Input.GetTouch(0).phase == TouchPhase.Ended)
             {
                 spawnedObject = null;
             }
@@ -57,6 +59,9 @@ public class SpawnableManager : MonoBehaviour
 
     private void SpawnPrefab(Vector3 spawnPosition)
     {
-        spawnedObject = Instantiate(spawnablePrefab, spawnPosition, Quaternion.identity);
+        int length = spawnablePrefabs.Length;
+        int selectedIndex = UnityEngine.Random.Range(0, length);
+
+        spawnedObject = Instantiate(spawnablePrefabs[selectedIndex], spawnPosition, Quaternion.identity);
     }
 }
