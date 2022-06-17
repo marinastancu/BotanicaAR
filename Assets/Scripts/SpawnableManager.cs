@@ -12,10 +12,16 @@ public class SpawnableManager : MonoBehaviour
     GameObject[] spawnablePrefabs;
 
     Camera arCam;
+    
+
     GameObject spawnedObject;
+    Vector3? previousLocation;
+    GameObject previousObject;
     void Start()
     {
         spawnedObject = null;
+        previousLocation = null;
+        previousObject = null;
         arCam = GameObject.Find("AR Camera").GetComponent<Camera>();
     }
 
@@ -31,23 +37,30 @@ public class SpawnableManager : MonoBehaviour
             
         if (m_RaycastManager.Raycast(Input.GetTouch(0).position, m_Hits))
         {
-            if(Input.GetTouch(0).phase==TouchPhase.Began&& spawnedObject == null)
+            if(Input.GetTouch(0).phase==TouchPhase.Began&& spawnedObject==null)
             {
                 if(Physics.Raycast(ray,out hit))
                 {
+                    Destroy(previousObject);
+
                     if (hit.collider.gameObject.tag == "Spawnable")
-                    {
+                    {    
                         spawnedObject = hit.collider.gameObject;
                     }
-                    else
+                    else if (previousLocation == null)
                     {
                         SpawnPrefab(m_Hits[0].pose.position);
                     }
+                    else
+                    {
+                        SpawnPrefab((Vector3)previousLocation);
+                    }
                 }
             }
-            else if (Input.GetTouch(0).phase == TouchPhase.Moved && spawnedObject != null)
+            else if (Input.GetTouch(0).phase == TouchPhase.Moved && spawnedObject!=null)
             {
-                spawnedObject.transform.position = m_Hits[0].pose.position;
+               spawnedObject.transform.position = m_Hits[0].pose.position;
+               previousLocation = spawnedObject.transform.position;
             }
 
             if (Input.GetTouch(0).phase == TouchPhase.Ended)
@@ -59,9 +72,9 @@ public class SpawnableManager : MonoBehaviour
 
     private void SpawnPrefab(Vector3 spawnPosition)
     {
-        int length = spawnablePrefabs.Length;
-        int selectedIndex = UnityEngine.Random.Range(0, length);
-
+        int selectedIndex = UnityEngine.Random.Range(0, spawnablePrefabs.Length);
         spawnedObject = Instantiate(spawnablePrefabs[selectedIndex], spawnPosition, Quaternion.identity);
+        previousLocation=spawnPosition;
+        previousObject = spawnedObject;
     }
 }
